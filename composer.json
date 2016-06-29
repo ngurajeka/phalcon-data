@@ -1,0 +1,25 @@
+{
+    "name": "ngurajeka/phalcon-data",
+    "description": "Phalcon Data",
+    "type": "library",
+    "version": "1.0",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "ngurajeka/phalcon-crud": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ady Rahmat MA",
+            "email": "ngurajeka.92@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "Ng\\Phalcon": "src"
+        }
+    }
+}
