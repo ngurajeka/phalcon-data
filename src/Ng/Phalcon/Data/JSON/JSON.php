@@ -13,10 +13,12 @@
 namespace Ng\Phalcon\Data\JSON;
 
 
-use Ng\Phalcon\Data\DataInterface;
+use Ng\Phalcon\Data\NgDataInterface;
 use Ng\Phalcon\Data\Envelope;
 use Ng\Phalcon\Data\Relation;
-use Ng\Phalcon\Models\NgModelInterface;
+use Ng\Phalcon\Models\NgModelBase;
+
+use Phalcon\Mvc\Model\Resultset;
 
 /**
  * Data Interface
@@ -27,7 +29,7 @@ use Ng\Phalcon\Models\NgModelInterface;
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/ngurajeka/phalcon-data
  */
-class JSON implements DataInterface
+class JSON implements NgDataInterface
 {
     /** @type Envelope $envelope */
     protected $envelope;
@@ -38,7 +40,7 @@ class JSON implements DataInterface
     protected $data     = array();
     protected $linked   = array();
 
-    /** @type Resultset|NgModelInterface $src */
+    /** @type Resultset|NgModelBase $src */
     protected $src;
 
     public function __construct()
@@ -50,12 +52,12 @@ class JSON implements DataInterface
     protected function iterateSrc()
     {
         foreach ($this->src as $src) {
-            /** @type NgModelInterface $src */
+            /** @type NgModelBase $src */
             $this->buildSrc($src);
         }
     }
 
-    protected function buildSrc(NgModelInterface $src, $multiple=true)
+    protected function buildSrc(NgModelBase $src, $multiple=true)
     {
         $data = $this->envelope->envelope($src);
         $this->relation->getRelations(
@@ -82,7 +84,7 @@ class JSON implements DataInterface
             return;
         }
 
-        if ($this->src instanceof NgModel) {
+        if ($this->src instanceof NgModelBase) {
             $this->buildSrc($this->src, false);
             return;
         }

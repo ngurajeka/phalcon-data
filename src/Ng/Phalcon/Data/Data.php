@@ -45,7 +45,7 @@ class Data
                     $mod = new JSON\JSON();
                     $mod->setSource($src);
                     $mod->populate();
-                    $this->result = $mod->getPopulated();
+                    $this->populated = $mod->getPopulated();
                     break;
 
                 default:

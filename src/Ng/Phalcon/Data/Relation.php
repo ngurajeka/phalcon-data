@@ -13,9 +13,10 @@
 namespace Ng\Phalcon\Data;
 
 
-use Ng\Phalcon\Models\NgModelInterface;
+use Ng\Phalcon\Models\NgModelBase;
 
 use Phalcon\Mvc\Model\Relation as ModelRelation;
+use Phalcon\Mvc\Model\Resultset;
 
 /**
  * Relation
@@ -40,7 +41,7 @@ class Relation
     protected $hasOneIds    = array();
 
     final protected function belongsTo(
-        NgModelInterface $model, ModelRelation $relation
+        NgModelBase $model, ModelRelation $relation
     ) {
 
         // checking options from relations
@@ -78,7 +79,7 @@ class Relation
         }
 
         // check if the model was an instance of NgModel
-        if (!$relationModel instanceof NgModelInterface) {
+        if (!$relationModel instanceof NgModelBase) {
             return;
         }
 
@@ -98,7 +99,7 @@ class Relation
     }
 
     final protected function hasOne(
-        NgModelInterface $model, ModelRelation $relation
+        NgModelBase $model, ModelRelation $relation
     ) {
 
         // check options for alias
@@ -113,13 +114,13 @@ class Relation
 
         // fetch resultset
         try {
-            /** @type NgModelInterface $ngModel */
+            /** @type NgModelBase $ngModel */
             $ngModel = $model->{$alias};
-        } catch (/Exception $e) {
+        } catch (\Exception $e) {
             throw new Exception($e->getMessage());
         }
 
-        if (!$ngModel instanceof NgModelInterface) {
+        if (!$ngModel instanceof NgModelBase) {
             return;
         }
 
@@ -133,7 +134,7 @@ class Relation
             $this->linked[$references] = array();
         }
 
-        /** @type NgModelInterface $ngModel */
+        /** @type NgModelBase $ngModel */
         // check if this model already populated
         if (in_array($ngModel->getId(), $this->hasOneIds)) {
             return;
@@ -160,7 +161,7 @@ class Relation
     }
 
     final protected function hasMany(
-        NgModelInterface $model, ModelRelation $relation
+        NgModelBase $model, ModelRelation $relation
     ) {
 
         // check options for alias
@@ -192,7 +193,7 @@ class Relation
         }
 
         foreach ($resultSet as $ngModel) {
-            /** @type NgModelInterface $ngModel */
+            /** @type NgModelBase $ngModel */
             // check if this model already populated
             if (in_array($ngModel->getId(), $this->hasManyIds)) {
                 continue;
@@ -220,7 +221,7 @@ class Relation
     }
 
     public function getRelations(
-        array &$data, NgModel $model, Envelope $envelope, array &$linked
+        array &$data, NgModelBase $model, Envelope $envelope, array &$linked
     ) {
 
         if (!isset($data["links"])) {
@@ -236,7 +237,7 @@ class Relation
         $linked = $this->linked;
     }
 
-    private function fetchRelationUsingModelsManager(NgModelInterface $model)
+    private function fetchRelationUsingModelsManager(NgModelBase $model)
     {
         $modelsManager = $model->getModelsManager();
 
