@@ -28,11 +28,20 @@ class Data
     const UNKNOWN   = "Unknown Type";
 
     protected $type;
+    protected $throwException = false;
     protected $populated;
 
-    public function __construct($type=self::JSON)
+    public function __construct($type=self::JSON, $throwException=false)
     {
-        $this->type = $type;
+        $this->type             = $type;
+        $this->throwException   = $throwException;
+    }
+
+    protected function act($msg)
+    {
+        if ($this->throwException === true) {
+            throw new Exception($msg);
+        }
     }
 
     public function populate($src)
@@ -49,11 +58,11 @@ class Data
                     break;
 
                 default:
-                    throw new Exception(self::UNKNOWN);
+                    $this->act(self::UNKNOWN);
                     break;
             }
         } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+            $this->act($e->getMessage());
         }
     }
 
