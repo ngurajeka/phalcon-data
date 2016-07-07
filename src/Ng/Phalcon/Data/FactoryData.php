@@ -1,6 +1,6 @@
 <?php
 /**
- * Data Container
+ * Factory Data
  *
  * PHP Version 5.4.x
  *
@@ -14,7 +14,7 @@ namespace Ng\Phalcon\Data;
 
 
 /**
- * Data Container
+ * Factory Data
  *
  * @category Library
  * @package  Library
@@ -22,14 +22,14 @@ namespace Ng\Phalcon\Data;
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/ngurajeka/phalcon-data
  */
-class Data
+class FactoryData
 {
-    const JSON      = "json";
-    const UNKNOWN   = "Unknown Type";
+    const JSON          = "json";
+    const UNKNOWN_TYPE  = "Unknown Type";
 
     protected $type;
+
     protected $throwException = false;
-    protected $populated;
 
     public function __construct($type=self::JSON, $throwException=false)
     {
@@ -46,28 +46,26 @@ class Data
 
     public function populate($src)
     {
+        $populated = null;
+
         try {
             switch ($this->type) {
 
                 case self::JSON:
-
-                    $mod = new JSON\JSON();
-                    $mod->setSource($src);
-                    $mod->populate();
-                    $this->populated = $mod->getPopulated();
+                    $data       = new JSON\JSON(new NgData($src));
+                    $data->buildSource(true);
+                    $populated  = $data->getResult();
                     break;
 
                 default:
-                    $this->act(self::UNKNOWN);
+                    $this->act(self::UNKNOWN_TYPE);
                     break;
             }
         } catch (Exception $e) {
             $this->act($e->getMessage());
         }
+
+        return $populated;
     }
 
-    public function getPopulated()
-    {
-        return $this->populated;
-    }
 }
