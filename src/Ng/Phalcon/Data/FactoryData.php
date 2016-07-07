@@ -29,11 +29,16 @@ class FactoryData
 
     protected $type;
 
-    protected $throwException = false;
+    protected $typeList         = array();
+    protected $throwException   = false;
 
     public function __construct($type=self::JSON, $throwException=false)
     {
-        $this->type             = $type;
+        $this->typeList = array(
+            self::JSON => "JSON\JSON",
+        );
+        $this->type     = $type;
+
         $this->throwException   = $throwException;
     }
 
@@ -48,19 +53,15 @@ class FactoryData
     {
         $populated = null;
 
+        if (!array_key_exists($this->type, $this->typeList)) {
+            return $populated;
+        }
+
         try {
-            switch ($this->type) {
-
-                case self::JSON:
-                    $data       = new JSON\JSON(new NgData($src));
-                    $data->buildSource(true);
-                    $populated  = $data->getResult();
-                    break;
-
-                default:
-                    $this->act(self::UNKNOWN_TYPE);
-                    break;
-            }
+            $path = $this->typeList[$this->type];
+            $data = new $path(new NgData($src));
+            $data->buildSource(true);
+            $populated = $data->getResult();
         } catch (Exception $e) {
             $this->act($e->getMessage());
         }
