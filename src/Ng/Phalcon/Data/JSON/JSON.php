@@ -1,6 +1,6 @@
 <?php
 /**
- * Data Interface
+ * JSON Builder
  *
  * PHP Version 5.4.x
  *
@@ -13,15 +13,10 @@
 namespace Ng\Phalcon\Data\JSON;
 
 
-use Ng\Phalcon\Data\NgDataInterface;
-use Ng\Phalcon\Data\Envelope;
-use Ng\Phalcon\Data\Relation;
-use Ng\Phalcon\Models\NgModelBase;
-
-use Phalcon\Mvc\Model\Resultset;
+use Ng\Phalcon\Data\AbstractNgData;
 
 /**
- * Data Interface
+ * JSON Builder
  *
  * @category Library
  * @package  Library
@@ -29,77 +24,59 @@ use Phalcon\Mvc\Model\Resultset;
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/ngurajeka/phalcon-data
  */
-class JSON implements NgDataInterface
+class JSON extends AbstractNgData
 {
-    /** @type Envelope $envelope */
-    protected $envelope;
+    protected $data = array();
 
-    /** @type Relation $relation */
-    protected $relation;
-
-    protected $data     = array();
-    protected $linked   = array();
-
-    /** @type Resultset|NgModelBase $src */
-    protected $src;
-
-    public function __construct()
+    /**
+     * Stringify Result from data builder
+     *
+     * @return string
+     */
+    public function stringifyResult()
     {
-        $this->envelope = new Envelope();
-        $this->relation = new Relation();
+        return json_encode($this->getResult());
     }
 
-    protected function iterateSrc()
+    /**
+     * Decode Result from data builder
+     *
+     * @param boolean $associative
+     *
+     * @return \stdClass|array
+     */
+    public function decodeResult($associative=false)
     {
-        foreach ($this->src as $src) {
-            /** @type NgModelBase $src */
-            $this->buildSrc($src);
-        }
+        return json_decode($this->stringifyResult(), $associative);
     }
 
-    protected function buildSrc(NgModelBase $src, $multiple=true)
+    /**
+     * Build Source Data using wrapper builder
+     *
+     * @param boolean $fetchRelation
+     *
+     * @return void
+     */
+    public function buildSource($fetchRelation=true)
     {
-        $data = $this->envelope->envelope($src);
-        $this->relation->getRelations(
-            $data, $src, $this->envelope, $this->linked
-        );
-
-        if ($multiple == true) {
-            $this->data[]   = $data;
-        } else {
-            $this->data     = $data;
-        }
-
-        unset($data);
+        $this->wrapper->buildSource($fetchRelation);
+        $this->data = $this->wrapper->getResult();
     }
 
-    public function populate()
+    /**
+     * Get the result from data builder
+     *
+     * @return array
+     */
+    public function getResult()
     {
-        if (is_null($this->src) OR empty($this->src)) {
-            return;
+        $result = array("data" => array(), "linked" => array());
+        if (isset($this->data["data"])) {
+            $result["data"]     = $this->data["data"];
         }
 
-        if ($this->src instanceof Resultset) {
-            $this->iterateSrc();
-            return;
+        if (isset($this->data["relations"])) {
+            $result["linked"]   = $this->data["relations"];
         }
-
-        if ($this->src instanceof NgModelBase) {
-            $this->buildSrc($this->src, false);
-            return;
-        }
-    }
-
-    public function getPopulated()
-    {
-        return array(
-            "linked"    => $this->linked,
-            "data"      => $this->data,
-        );
-    }
-
-    public function setSource($src)
-    {
-        $this->src = $src;
     }
 }
