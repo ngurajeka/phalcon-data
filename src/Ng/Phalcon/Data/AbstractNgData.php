@@ -1,6 +1,6 @@
 <?php
 /**
- * NgDataInterface
+ * Abstract NgData
  *
  * PHP Version 5.4.x
  *
@@ -13,11 +13,8 @@
 namespace Ng\Phalcon\Data;
 
 
-use Phalcon\Mvc\Model\Resultset;
-use Phalcon\Mvc\ModelInterface;
-
 /**
- * NgDataInterface
+ * Abstract NgData
  *
  * @category Library
  * @package  Library
@@ -25,9 +22,13 @@ use Phalcon\Mvc\ModelInterface;
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/ngurajeka/phalcon-data
  */
-interface NgDataInterface
+abstract class AbstractNgData implements NgDataInterface
 {
-    public function buildSource($fetchRelation=true);
+    /** @type NgData $wrapper */
+    protected $wrapper;
 
-    public function getResult();
+    public function __construct(NgData $data)
+    {
+        $this->wrapper = $data;
+    }
 }
