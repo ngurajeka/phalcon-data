@@ -63,20 +63,20 @@ class NgData implements NgDataInterface
     {
         $this->fetchRelation = $fetchRelation;
 
-        if ($this->src instanceOf Resultset) {
+        if ($this->source instanceOf Resultset) {
             $this->iterate();
             return;
         }
 
-        if ($this->src instanceOf ModelInterface) {
-            $this->build($this->src, false);
+        if ($this->source instanceOf ModelInterface) {
+            $this->build($this->source, false);
             return;
         }
     }
 
     private function iterate()
     {
-        foreach ($this->src as $src) {
+        foreach ($this->source as $src) {
             /** @type ModelInterface $src */
             $this->build($src);
         }
@@ -116,6 +116,6 @@ class NgData implements NgDataInterface
      */
     public function getResult()
     {
-        return array("data" => $data, "relations" => $relations);
+        return array("data" => $this->data, "relations" => $this->relations);
     }
 }
