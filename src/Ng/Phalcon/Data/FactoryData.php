@@ -35,7 +35,7 @@ class FactoryData
     public function __construct($type=self::JSON, $throwException=false)
     {
         $this->typeList = array(
-            self::JSON => "JSON\JSON",
+            self::JSON => __NAMESPACE__ . "\\JSON\\JSON",
         );
         $this->type     = $type;
 
