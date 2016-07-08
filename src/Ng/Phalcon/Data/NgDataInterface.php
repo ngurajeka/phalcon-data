@@ -13,9 +13,6 @@
 namespace Ng\Phalcon\Data;
 
 
-use Phalcon\Mvc\Model\Resultset;
-use Phalcon\Mvc\ModelInterface;
-
 /**
  * NgDataInterface
  *

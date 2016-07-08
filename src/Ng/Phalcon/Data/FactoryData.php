@@ -59,6 +59,7 @@ class FactoryData
 
         try {
             $path = $this->typeList[$this->type];
+            /** @type NgDataInterface $data */
             $data = new $path(new NgData($src));
             $data->buildSource(true);
             $populated = $data->getResult();
