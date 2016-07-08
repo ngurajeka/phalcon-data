@@ -14,14 +14,13 @@ namespace Ng\Phalcon\Data;
 
 
 use Ng\Query\Query;
-use Ng\Query\Condition\ArrayCondition;
 use Ng\Query\Condition\SimpleCondition;
 use Ng\Query\Operator;
 use Ng\Phalcon\Crud\Crud;
 use Ng\Phalcon\Crud\Exception as CrudException;
 use Ng\Phalcon\Models\NgModelBase;
 
-use Phalcon\Mvc\Model\Exception as ModelException;
+use Phalcon\Mvc\Model\Manager as ModelManager;
 use Phalcon\Mvc\Model\Relation as ModelRelation;
 use Phalcon\Mvc\Model\Resultset;
 
@@ -47,9 +46,7 @@ class Relation
     protected $hasManyIds   = array();
     protected $hasOneIds    = array();
 
-    final protected function belongsTo(
-        NgModelBase $model, ModelRelation $relation
-    ) {
+    final protected function belongsTo(ModelRelation $relation) {
 
         // checking options from relations
         $opts       = $relation->getOptions();
@@ -130,7 +127,7 @@ class Relation
 
         $query = new Query();
         $query->addCondition(
-            new SimpleCondition($reference, Operator::OP_EQUALS, $this->data[$field])
+            new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
         );
 
         // fetch resultset
@@ -269,10 +266,11 @@ class Relation
 
     private function fetchRelationUsingModelsManager(NgModelBase $model)
     {
+        /** @var ModelManager $modelsManager */
         $modelsManager = $model->getModelsManager();
 
         foreach ($modelsManager->getBelongsTo($model) as $relation) {
-            $this->belongsTo($model, $relation);
+            $this->belongsTo($relation);
         }
 
         foreach ($modelsManager->getHasMany($model) as $relation) {
