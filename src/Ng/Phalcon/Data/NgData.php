@@ -45,7 +45,7 @@ class NgData implements NgDataInterface
         if (is_null($source) OR empty($source)) {
             throw new Exception(self::INVALID_SOURCE);
         } else if (!$source instanceOf Resultset
-            OR !$source instanceOf ModelInterface) {
+            AND !$source instanceOf ModelInterface) {
             throw new Exception(self::INVALID_SOURCE);
         }
 
