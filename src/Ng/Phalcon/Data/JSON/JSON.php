@@ -78,5 +78,7 @@ class JSON extends AbstractNgData
         if (isset($this->data["relations"])) {
             $result["linked"]   = $this->data["relations"];
         }
+
+        return $result;
     }
 }
