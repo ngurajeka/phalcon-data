@@ -13,8 +13,15 @@
 namespace Ng\Phalcon\Data;
 
 
+use Ng\Query\Query;
+use Ng\Query\Condition\ArrayCondition;
+use Ng\Query\Condition\SimpleCondition;
+use Ng\Query\Operator;
+use Ng\Phalcon\Crud\Crud;
+use Ng\Phalcon\Crud\Exception as CrudException;
 use Ng\Phalcon\Models\NgModelBase;
 
+use Phalcon\Mvc\Model\Exception as ModelException;
 use Phalcon\Mvc\Model\Relation as ModelRelation;
 use Phalcon\Mvc\Model\Resultset;
 
@@ -51,9 +58,10 @@ class Relation
         }
 
         // build local needed variable
-        $alias      = $opts["alias"];
-        $field      = $relation->getFields();
-        $reference  = $relation->getReferencedFields();
+        $field  = $relation->getFields();
+
+        $reference      = $relation->getReferencedFields();
+        $modelRelation  = $relation->getReferencedModel();
 
         // check if related field exist or not
         if (!isset($this->data[$field])) {
@@ -71,10 +79,18 @@ class Relation
         // store to haystack
         $this->belongsToIds[] = $this->data[$field];
 
+        $query = new Query();
+        $query->addCondition(
+            new SimpleCondition($reference, Operator::OP_EQUALS, $this->data[$field])
+        );
+
         // fetch model data, otherwise throw an exception
         try {
-            $relationModel = $model->{$alias};
-        } catch (\Exception $e) {
+            $handler        = new Crud();
+            /** @var $relationModel NgModelBase */
+            $relationModel  = $handler->read(new $modelRelation, $query, true);
+            unset($handler);
+        } catch (CrudException $e) {
             throw new Exception($e->getMessage());
         }
 
@@ -109,14 +125,21 @@ class Relation
         }
 
         // build needed variable(s)
-        $alias      = $opts["alias"];
-        $references = $relation->getReferencedFields();
+        $references     = $relation->getReferencedFields();
+        $modelRelation  = $relation->getReferencedModel();
+
+        $query = new Query();
+        $query->addCondition(
+            new SimpleCondition($reference, Operator::OP_EQUALS, $this->data[$field])
+        );
 
         // fetch resultset
         try {
+            $handler    = new Crud();
             /** @type NgModelBase $ngModel */
-            $ngModel = $model->{$alias};
-        } catch (\Exception $e) {
+            $ngModel    = $handler->read(new $modelRelation, $query, true);
+            unset($handler);
+        } catch (CrudException $e) {
             throw new Exception($e->getMessage());
         }
 
@@ -171,14 +194,21 @@ class Relation
         }
 
         // build needed variable(s)
-        $alias      = $opts["alias"];
-        $references = $relation->getReferencedFields();
+        $references     = $relation->getReferencedFields();
+        $modelRelation  = $relation->getReferencedModel();
+
+        $query = new Query();
+        $query->addCondition(
+            new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
+        );
 
         // fetch resultset
         try {
+            $handler    = new Crud();
             /** @type Resultset $resultSet */
-            $resultSet = $model->{$alias};
-        } catch (Exception $e) {
+            $resultSet  = $handler->read(new $modelRelation, $query, false);
+            unset($handler);
+        } catch (CrudException $e) {
             throw new Exception($e->getMessage());
         }
 
