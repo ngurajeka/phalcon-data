@@ -13,6 +13,7 @@
 namespace Ng\Phalcon\Data;
 
 
+use Ng\Phalcon\Models\NgModelBase;
 use Phalcon\Mvc\Model\Resultset;
 use Phalcon\Mvc\ModelInterface;
 
@@ -45,7 +46,7 @@ class NgData implements NgDataInterface
         if (is_null($source) OR empty($source)) {
             throw new Exception(self::INVALID_SOURCE);
         } else if (!$source instanceOf Resultset
-            OR !$source instanceOf ModelInterface) {
+            AND !$source instanceOf ModelInterface) {
             throw new Exception(self::INVALID_SOURCE);
         }
 
@@ -63,21 +64,21 @@ class NgData implements NgDataInterface
     {
         $this->fetchRelation = $fetchRelation;
 
-        if ($this->src instanceOf Resultset) {
+        if ($this->source instanceOf Resultset) {
             $this->iterate();
             return;
         }
 
-        if ($this->src instanceOf ModelInterface) {
-            $this->build($this->src, false);
+        if ($this->source instanceOf ModelInterface) {
+            $this->build($this->source, false);
             return;
         }
     }
 
     private function iterate()
     {
-        foreach ($this->src as $src) {
-            /** @type ModelInterface $src */
+        foreach ($this->source as $src) {
+            /** @type NgModelBase $src */
             $this->build($src);
         }
     }
@@ -85,12 +86,12 @@ class NgData implements NgDataInterface
     /**
      * Build The source
      *
-     * @param ModelInterface    $src
-     * @param boolean           $multiple
+     * @param NgModelBase $src
+     * @param boolean     $multiple
      *
      * @return void
      */
-    private function build(ModelInterface $src, $multiple=true)
+    private function build(NgModelBase $src, $multiple=true)
     {
         $data = $this->envelope->envelope($src);
 
@@ -116,6 +117,6 @@ class NgData implements NgDataInterface
      */
     public function getResult()
     {
-        return array("data" => $data, "relations" => $relations);
+        return array("data" => $this->data, "relations" => $this->relations);
     }
 }

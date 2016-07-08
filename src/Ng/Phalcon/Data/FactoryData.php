@@ -1,6 +1,6 @@
 <?php
 /**
- * Data Container
+ * Factory Data
  *
  * PHP Version 5.4.x
  *
@@ -14,7 +14,7 @@ namespace Ng\Phalcon\Data;
 
 
 /**
- * Data Container
+ * Factory Data
  *
  * @category Library
  * @package  Library
@@ -22,18 +22,23 @@ namespace Ng\Phalcon\Data;
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/ngurajeka/phalcon-data
  */
-class Data
+class FactoryData
 {
-    const JSON      = "json";
-    const UNKNOWN   = "Unknown Type";
+    const JSON          = "json";
+    const UNKNOWN_TYPE  = "Unknown Type";
 
     protected $type;
-    protected $throwException = false;
-    protected $populated;
+
+    protected $typeList         = array();
+    protected $throwException   = false;
 
     public function __construct($type=self::JSON, $throwException=false)
     {
-        $this->type             = $type;
+        $this->typeList = array(
+            self::JSON => __NAMESPACE__ . "\\JSON\\JSON",
+        );
+        $this->type     = $type;
+
         $this->throwException   = $throwException;
     }
 
@@ -46,28 +51,23 @@ class Data
 
     public function populate($src)
     {
+        $populated = null;
+
+        if (!array_key_exists($this->type, $this->typeList)) {
+            return $populated;
+        }
+
         try {
-            switch ($this->type) {
-
-                case self::JSON:
-
-                    $mod = new JSON\JSON();
-                    $mod->setSource($src);
-                    $mod->populate();
-                    $this->populated = $mod->getPopulated();
-                    break;
-
-                default:
-                    $this->act(self::UNKNOWN);
-                    break;
-            }
+            $path = $this->typeList[$this->type];
+            /** @type NgDataInterface $data */
+            $data = new $path(new NgData($src));
+            $data->buildSource(true);
+            $populated = $data->getResult();
         } catch (Exception $e) {
             $this->act($e->getMessage());
         }
+
+        return $populated;
     }
 
-    public function getPopulated()
-    {
-        return $this->populated;
-    }
 }

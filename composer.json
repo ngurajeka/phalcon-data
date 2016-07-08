@@ -2,12 +2,13 @@
     "name": "ngurajeka/phalcon-data",
     "description": "Phalcon Data",
     "type": "library",
-    "version": "1.0",
+    "version": "2.0",
     "require": {
         "php": ">=5.4.0"
     },
     "require-dev": {
-        "ngurajeka/phalcon-crud": "dev-master"
+        "ngurajeka/phalcon-models": "1.0.x-dev",
+        "ngurajeka/phalcon-crud": "2.0.x-dev"
     },
     "license": "MIT",
     "authors": [

@@ -14,6 +14,7 @@ namespace Ng\Phalcon\Data;
 
 
 use Ng\Phalcon\Models\NgModelBase;
+use Phalcon\Mvc\Model\MetaData as ModelMetaData;
 
 /**
  * Envelope Data
@@ -28,6 +29,7 @@ class Envelope
 {
     public function envelope(NgModelBase $model)
     {
+        /** @type ModelMetaData $modelsMetadata */
         $modelsMetadata = $model->getModelsMetaData();
 
         $data       = array();
