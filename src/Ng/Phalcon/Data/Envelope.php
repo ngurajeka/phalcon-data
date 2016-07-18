@@ -33,7 +33,7 @@ class Envelope
         $modelsMetadata = $model->getModelsMetaData();
 
         $data       = array();
-        $data['id'] = (int) $model->getId();
+        $data['id'] = $model->getId();
         $publics    = $model::getPublicFields();
         $fields     = $modelsMetadata->getDataTypes($model);
 
