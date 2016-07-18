@@ -13,7 +13,7 @@
 namespace Ng\Phalcon\Data;
 
 
-use Ng\Phalcon\Models\NgModelBase;
+use Ng\Phalcon\Models\Abstracts\NgModel;
 use Phalcon\Mvc\Model\Resultset;
 use Phalcon\Mvc\ModelInterface;
 
@@ -78,7 +78,7 @@ class NgData implements NgDataInterface
     private function iterate()
     {
         foreach ($this->source as $src) {
-            /** @type NgModelBase $src */
+            /** @type NgModel $src */
             $this->build($src);
         }
     }
@@ -86,12 +86,12 @@ class NgData implements NgDataInterface
     /**
      * Build The source
      *
-     * @param NgModelBase $src
-     * @param boolean     $multiple
+     * @param NgModel $src
+     * @param boolean $multiple
      *
      * @return void
      */
-    private function build(NgModelBase $src, $multiple=true)
+    private function build(NgModel $src, $multiple=true)
     {
         $data = $this->envelope->envelope($src);
 

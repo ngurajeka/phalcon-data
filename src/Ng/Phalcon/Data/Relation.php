@@ -13,13 +13,12 @@
 namespace Ng\Phalcon\Data;
 
 
-use Ng\Query\Query;
-use Ng\Query\Condition\SimpleCondition;
-use Ng\Query\Operator;
-use Ng\Phalcon\Crud\Crud;
-use Ng\Phalcon\Crud\Exception as CrudException;
-use Ng\Phalcon\Models\NgModelBase;
-
+use Ng\Phalcon\Crud\Adapters\SQL\Crud;
+use Ng\Phalcon\Crud\Exceptions\Exception as CrudException;
+use Ng\Phalcon\Models\Abstracts\NgModel;
+use Ng\Query\Adapters\SQL\Conditions\SimpleCondition;
+use Ng\Query\Adapters\SQL\Query;
+use Ng\Query\Helpers\Operator;
 use Phalcon\Mvc\Model\Manager as ModelManager;
 use Phalcon\Mvc\Model\Relation as ModelRelation;
 use Phalcon\Mvc\Model\Resultset;
@@ -84,7 +83,7 @@ class Relation
         // fetch model data, otherwise throw an exception
         try {
             $handler        = new Crud();
-            /** @var $relationModel NgModelBase */
+            /** @var $relationModel NgModel */
             $relationModel  = $handler->read(new $modelRelation, $query, true);
             unset($handler);
         } catch (CrudException $e) {
@@ -92,7 +91,7 @@ class Relation
         }
 
         // check if the model was an instance of NgModel
-        if (!$relationModel instanceof NgModelBase) {
+        if (!$relationModel instanceof NgModel) {
             return;
         }
 
@@ -112,7 +111,7 @@ class Relation
     }
 
     final protected function hasOne(
-        NgModelBase $model, ModelRelation $relation
+        NgModel $model, ModelRelation $relation
     ) {
 
         // check options for alias
@@ -133,14 +132,14 @@ class Relation
         // fetch resultset
         try {
             $handler    = new Crud();
-            /** @type NgModelBase $ngModel */
+            /** @type NgModel $ngModel */
             $ngModel    = $handler->read(new $modelRelation, $query, true);
             unset($handler);
         } catch (CrudException $e) {
             throw new Exception($e->getMessage());
         }
 
-        if (!$ngModel instanceof NgModelBase) {
+        if (!$ngModel instanceof NgModel) {
             return;
         }
 
@@ -154,7 +153,7 @@ class Relation
             $this->linked[$references] = array();
         }
 
-        /** @type NgModelBase $ngModel */
+        /** @type NgModel $ngModel */
         // check if this model already populated
         if (in_array($ngModel->getId(), $this->hasOneIds)) {
             return;
@@ -181,7 +180,7 @@ class Relation
     }
 
     final protected function hasMany(
-        NgModelBase $model, ModelRelation $relation
+        NgModel $model, ModelRelation $relation
     ) {
 
         // check options for alias
@@ -220,7 +219,7 @@ class Relation
         }
 
         foreach ($resultSet as $ngModel) {
-            /** @type NgModelBase $ngModel */
+            /** @type NgModel $ngModel */
             // check if this model already populated
             if (in_array($ngModel->getId(), $this->hasManyIds)) {
                 continue;
@@ -248,7 +247,7 @@ class Relation
     }
 
     public function getRelations(
-        array &$data, NgModelBase $model, Envelope $envelope, array &$linked
+        array &$data, NgModel $model, Envelope $envelope, array &$linked
     ) {
 
         if (!isset($data["links"])) {
@@ -264,7 +263,7 @@ class Relation
         $linked = $this->linked;
     }
 
-    private function fetchRelationUsingModelsManager(NgModelBase $model)
+    private function fetchRelationUsingModelsManager(NgModel $model)
     {
         /** @var ModelManager $modelsManager */
         $modelsManager = $model->getModelsManager();
