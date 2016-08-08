@@ -53,6 +53,11 @@ class Relation
             return;
         }
 
+        $autoLimit  = true;
+        if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
+            $_autoLimit = $opts["limit"];
+        }
+
         // build local needed variable
         $field  = $relation->getFields();
 
@@ -75,7 +80,7 @@ class Relation
         // store to haystack
         $this->belongsToIds[] = $this->data[$field];
 
-        $query = new Query();
+        $query = new Query($autoLimit);
         $query->addCondition(
             new SimpleCondition($reference, Operator::OP_EQUALS, $this->data[$field])
         );
