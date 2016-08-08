@@ -125,11 +125,16 @@ class Relation
             return;
         }
 
+        $autoLimit      = true;
+        if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
+            $autoLimit  = $opts["limit"];
+        }
+
         // build needed variable(s)
         $references     = $relation->getReferencedFields();
         $modelRelation  = $relation->getReferencedModel();
 
-        $query = new Query();
+        $query = new Query($autoLimit);
         $query->addCondition(
             new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
         );
@@ -194,11 +199,16 @@ class Relation
             return;
         }
 
+        $autoLimit      = true;
+        if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
+            $autoLimit  = $opts["limit"];
+        }
+
         // build needed variable(s)
         $references     = $relation->getReferencedFields();
         $modelRelation  = $relation->getReferencedModel();
 
-        $query = new Query();
+        $query = new Query($autoLimit);
         $query->addCondition(
             new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
         );
