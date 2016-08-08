@@ -53,9 +53,9 @@ class Relation
             return;
         }
 
-        $autoLimit  = true;
+        $autoLimit      = true;
         if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
-            $_autoLimit = $opts["limit"];
+            $autoLimit  = $opts["limit"];
         }
 
         // build local needed variable
