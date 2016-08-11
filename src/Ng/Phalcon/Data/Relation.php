@@ -148,6 +148,14 @@ class Relation
         $query->addCondition(
             new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
         );
+        $sort      = SimpleOrder::ORDER_ASC;
+        if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
+            $sort  = $opts["sort"];
+        }
+
+        $query->addOrder(
+            new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
+        );
 
         // fetch resultset
         try {
@@ -221,6 +229,15 @@ class Relation
         $query = new Query($autoLimit);
         $query->addCondition(
             new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
+        );
+
+        $sort      = SimpleOrder::ORDER_ASC;
+        if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
+            $sort  = $opts["sort"];
+        }
+
+        $query->addOrder(
+            new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
         );
 
         // fetch resultset
