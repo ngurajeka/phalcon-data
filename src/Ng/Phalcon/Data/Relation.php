@@ -17,6 +17,7 @@ use Ng\Phalcon\Crud\Adapters\SQL\Crud;
 use Ng\Phalcon\Crud\Exceptions\Exception as CrudException;
 use Ng\Phalcon\Models\Abstracts\NgModel;
 use Ng\Query\Adapters\SQL\Conditions\SimpleCondition;
+use Ng\Query\Adapters\SQL\Orders\SimpleOrder;
 use Ng\Query\Adapters\SQL\Query;
 use Ng\Query\Helpers\Operator;
 use Phalcon\Mvc\Model\Manager as ModelManager;
@@ -83,6 +84,15 @@ class Relation
         $query = new Query($autoLimit);
         $query->addCondition(
             new SimpleCondition($reference, Operator::OP_EQUALS, $this->data[$field])
+        );
+
+        $sort      = SimpleOrder::ORDER_ASC;
+        if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
+            $sort  = $opts["sort"];
+        }
+
+        $query->addOrder(
+            new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
         );
 
         // fetch model data, otherwise throw an exception
