@@ -54,6 +54,15 @@ class Relation
             return;
         }
 
+		$fetch		= true;
+		if (array_key_exists("fetch", $opts) && is_bool($opts["fetch"])) {
+			$fetch	= $opts["fetch"];
+		}
+
+		if (!$fetch) {
+			return;
+		}
+
         $autoLimit      = true;
         if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
             $autoLimit  = $opts["limit"];
@@ -134,6 +143,15 @@ class Relation
         if (!isset($opts["alias"])) {
             return;
         }
+
+		$fetch		= true;
+		if (array_key_exists("fetch", $opts) && is_bool($opts["fetch"])) {
+			$fetch	= $opts["fetch"];
+		}
+
+		if (!$fetch) {
+			return;
+		}
 
         $autoLimit      = true;
         if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
@@ -216,6 +234,15 @@ class Relation
         if (!isset($opts["alias"])) {
             return;
         }
+
+		$fetch		= true;
+		if (array_key_exists("fetch", $opts) && is_bool($opts["fetch"])) {
+			$fetch	= $opts["fetch"];
+		}
+
+		if (!$fetch) {
+			return;
+		}
 
         $autoLimit      = true;
         if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
