@@ -72,6 +72,7 @@ class Relation
 		$field  = $relation->getFields();
 
 		$reference      = $relation->getReferencedFields();
+		/** @var NgModel $modelRelation */
 		$modelRelation  = $relation->getReferencedModel();
 
 		// check if related field exist or not
@@ -87,7 +88,7 @@ class Relation
 		$this->data["links"][$reference] = (int) $this->data[$field];
 
 		if (!isset($this->belongsToIds[$field])) {
-			$this->belongsToIds	= array();
+			$this->belongsToIds[$field]	= array();
 		}
 
 		// check if data[related] already populated
@@ -168,6 +169,7 @@ class Relation
 
 		// build needed variable(s)
 		$references     = $relation->getReferencedFields();
+		/** @var NgModel $modelRelation */
 		$modelRelation  = $relation->getReferencedModel();
 
 		$query = new Query($autoLimit);
@@ -265,6 +267,7 @@ class Relation
 
 		// build needed variable(s)
 		$references     = $relation->getReferencedFields();
+		/** @var NgModel $modelRelation */
 		$modelRelation  = $relation->getReferencedModel();
 
 		$query = new Query($autoLimit);
