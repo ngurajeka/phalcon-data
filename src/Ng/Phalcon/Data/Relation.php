@@ -35,24 +35,24 @@ use Phalcon\Mvc\Model\Resultset;
  */
 class Relation
 {
-    protected $data       = array();
-    protected $linked     = array();
-    protected $relations  = array();
+	protected $data       = array();
+	protected $linked     = array();
+	protected $relations  = array();
 
-    /** @type Envelope $envelope */
-    protected $envelope;
+	/** @type Envelope $envelope */
+	protected $envelope;
 
-    protected $belongsToIds = array();
-    protected $hasManyIds   = array();
-    protected $hasOneIds    = array();
+	protected $belongsToIds = array();
+	protected $hasManyIds   = array();
+	protected $hasOneIds    = array();
 
-    final protected function belongsTo(ModelRelation $relation) {
-
-        // checking options from relations
-        $opts       = $relation->getOptions();
-        if (!isset($opts["alias"])) {
-            return;
-        }
+	final protected function belongsTo(ModelRelation $relation)
+	{
+		// checking options from relations
+		$opts       = $relation->getOptions();
+		if (!isset($opts["alias"])) {
+			return;
+		}
 
 		$fetch		= true;
 		if (array_key_exists("fetch", $opts) && is_bool($opts["fetch"])) {
@@ -63,86 +63,94 @@ class Relation
 			return;
 		}
 
-        $autoLimit      = true;
-        if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
-            $autoLimit  = $opts["limit"];
-        }
+		$autoLimit      = true;
+		if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
+			$autoLimit  = $opts["limit"];
+		}
 
-        // build local needed variable
-        $field  = $relation->getFields();
+		// build local needed variable
+		$field  = $relation->getFields();
 
-        $reference      = $relation->getReferencedFields();
-        $modelRelation  = $relation->getReferencedModel();
+		$reference      = $relation->getReferencedFields();
+		$modelRelation  = $relation->getReferencedModel();
 
-        // check if related field exist or not
-        if (!isset($this->data[$field])) {
-            return;
-        }
+		// check if related field exist or not
+		if (!isset($this->data[$field])) {
+			return;
+		}
 
-        // build data.links
-        $this->data["links"][$reference] = (int) $this->data[$field];
+		if (!$this->data[$field]) {
+			return;
+		}
 
-        // check if data[related] already populated
-        if (in_array($this->data[$field], $this->belongsToIds)) {
-            return;
-        }
+		// build data.links
+		$this->data["links"][$reference] = (int) $this->data[$field];
 
-        // store to haystack
-        $this->belongsToIds[] = $this->data[$field];
+		if (!isset($this->belongsToIds[$field])) {
+			$this->belongsToIds	= array();
+		}
 
-        $query = new Query($autoLimit);
-        $query->addCondition(
-            new SimpleCondition($reference, Operator::OP_EQUALS, $this->data[$field])
-        );
+		// check if data[related] already populated
+		if (in_array($this->data[$field], $this->belongsToIds[$field])) {
+			return;
+		}
 
-        $sort      = SimpleOrder::ORDER_ASC;
-        if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
-            $sort  = $opts["sort"];
-        }
+		// store to haystack
+		$this->belongsToIds[$field][] = $this->data[$field];
 
-        $query->addOrder(
-            new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
-        );
+		$query = new Query($autoLimit);
+		$query->addCondition(
+			new SimpleCondition($reference, Operator::OP_EQUALS, $this->data[$field])
+		);
 
-        // fetch model data, otherwise throw an exception
-        try {
-            $handler        = new Crud();
-            /** @var $relationModel NgModel */
-            $relationModel  = $handler->read(new $modelRelation, $query, true);
-            unset($handler);
-        } catch (CrudException $e) {
-            throw new Exception($e->getMessage());
-        }
+		$sort      = SimpleOrder::ORDER_ASC;
+		if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
+			$sort  = $opts["sort"];
+		}
 
-        // check if the model was an instance of NgModel
-        if (!$relationModel instanceof NgModel) {
-            return;
-        }
+		$query->addOrder(
+			new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
+		);
 
-        // envelope relationModel to get relation data
-        $relationData = $this->envelope->envelope($relationModel);
+		// fetch model data, otherwise throw an exception
+		try {
+			$handler        = new Crud();
+			/** @var $relationModel NgModel */
+			$relationModel  = $handler->read(new $modelRelation, $query, true);
+			unset($handler);
+		} catch (CrudException $e) {
+			throw new Exception($e->getMessage());
+		}
 
-        // check if linked[reference] already populated
-        if (!isset($this->linked[$reference])) {
-            $this->linked[$reference]       = array();
-        }
+		// check if the model was an instance of NgModel
+		if (!$relationModel instanceof NgModel) {
+			return;
+		}
 
-        // put relation data on linked
-        $this->linked[$reference][]         = $relationData;
+		// envelope relationModel to get relation data
+		$relationData = $this->envelope->envelope($relationModel);
 
-        // remove data[field]
-        unset($this->data[$field]);
-    }
+		// check if linked[reference] already populated
+		if (!isset($this->linked[$reference])) {
+			$this->linked[$reference]       = array();
+		}
 
-    final protected function hasOne(
-        NgModel $model, ModelRelation $relation
-    ) {
+		// put relation data on linked
+		$this->linked[$reference][]         = $relationData;
 
-        // check options for alias
-        $opts       = $relation->getOptions();
-        if (!isset($opts["alias"])) {
-            return;
-        }
+		// remove data[field]
+		unset($this->data[$field]);
+	}
+
+	final protected function hasOne(
+		NgModel $model, ModelRelation $relation
+	) {
+
+		// check options for alias
+		$opts       = $relation->getOptions();
+		if (!isset($opts["alias"])) {
+			return;
+		}
 
 		$fetch		= true;
 		if (array_key_exists("fetch", $opts) && is_bool($opts["fetch"])) {
@@ -153,87 +161,93 @@ class Relation
 			return;
 		}
 
-        $autoLimit      = true;
-        if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
-            $autoLimit  = $opts["limit"];
-        }
+		$autoLimit      = true;
+		if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
+			$autoLimit  = $opts["limit"];
+		}
 
-        // build needed variable(s)
-        $references     = $relation->getReferencedFields();
-        $modelRelation  = $relation->getReferencedModel();
+		// build needed variable(s)
+		$references     = $relation->getReferencedFields();
+		$modelRelation  = $relation->getReferencedModel();
 
-        $query = new Query($autoLimit);
-        $query->addCondition(
-            new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
-        );
-        $sort      = SimpleOrder::ORDER_ASC;
-        if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
-            $sort  = $opts["sort"];
-        }
+		$query = new Query($autoLimit);
+		$query->addCondition(
+			new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
+		);
+		$sort      = SimpleOrder::ORDER_ASC;
+		if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
+			$sort  = $opts["sort"];
+		}
 
-        $query->addOrder(
-            new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
-        );
+		$query->addOrder(
+			new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
+		);
 
-        // fetch resultset
-        try {
-            $handler    = new Crud();
-            /** @type NgModel $ngModel */
-            $ngModel    = $handler->read(new $modelRelation, $query, true);
-            unset($handler);
-        } catch (CrudException $e) {
-            throw new Exception($e->getMessage());
-        }
+		// fetch resultset
+		try {
+			$handler    = new Crud();
+			/** @type NgModel $ngModel */
+			$ngModel    = $handler->read(new $modelRelation, $query, true);
+			unset($handler);
+		} catch (CrudException $e) {
+			throw new Exception($e->getMessage());
+		}
 
-        if (!$ngModel instanceof NgModel) {
-            return;
-        }
+		if (!$ngModel instanceof NgModel) {
+			return;
+		}
 
-        // check and prepare data.links
-        if (!isset($this->data["links"][$references])) {
-            $this->data["links"][$references] = array();
-        }
+		// check and prepare data.links
+		if (!isset($this->data["links"][$references])) {
+			$this->data["links"][$references] = array();
+		}
 
-        // check and prepare linked
-        if (!isset($this->linked[$references])) {
-            $this->linked[$references] = array();
-        }
+		// check and prepare linked
+		if (!isset($this->linked[$references])) {
+			$this->linked[$references] = array();
+		}
 
-        /** @type NgModel $ngModel */
-        // check if this model already populated
-        if (in_array($ngModel->getId(), $this->hasOneIds)) {
-            return;
-        }
+		/** @type NgModel $ngModel */
+		// check if this model already populated
+		if (!isset($this->hasOneIds[$references])) {
+			$this->hasOneIds[$references] = array();
+		}
 
-        // check if this model already in our data.links
-        if (in_array($ngModel->getId(), $this->data["links"][$references])) {
-            return;
-        }
+		if (in_array($ngModel->getId(), $this->hasOneIds)) {
+			return;
+		}
 
-        // put relation id on data.links
-        $this->data["links"][$references][] = (int) $ngModel->getId();
+		$this->hasOneIds[$references][]	= $ngModel->getId();
 
-        // envelope model into relation data
-        $relationData   = $this->envelope->envelope($ngModel);
+		// check if this model already in our data.links
+		if (in_array($ngModel->getId(), $this->data["links"][$references])) {
+			return;
+		}
 
-        // check if relationData already in our linked
-        if (in_array($relationData, $this->linked[$references])) {
-            return;
-        }
+		// put relation id on data.links
+		$this->data["links"][$references][] = (int) $ngModel->getId();
 
-        // put relation data on our linked
-        $this->linked[$references][] = $relationData;
-    }
+		// envelope model into relation data
+		$relationData   = $this->envelope->envelope($ngModel);
 
-    final protected function hasMany(
-        NgModel $model, ModelRelation $relation
-    ) {
+		// check if relationData already in our linked
+		if (in_array($relationData, $this->linked[$references])) {
+			return;
+		}
 
-        // check options for alias
-        $opts       = $relation->getOptions();
-        if (!isset($opts["alias"])) {
-            return;
-        }
+		// put relation data on our linked
+		$this->linked[$references][] = $relationData;
+	}
+
+	final protected function hasMany(
+		NgModel $model, ModelRelation $relation
+	) {
+
+		// check options for alias
+		$opts       = $relation->getOptions();
+		if (!isset($opts["alias"])) {
+			return;
+		}
 
 		$fetch		= true;
 		if (array_key_exists("fetch", $opts) && is_bool($opts["fetch"])) {
@@ -244,109 +258,115 @@ class Relation
 			return;
 		}
 
-        $autoLimit      = true;
-        if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
-            $autoLimit  = $opts["limit"];
-        }
+		$autoLimit      = true;
+		if (array_key_exists("limit", $opts) && is_bool($opts["limit"])) {
+			$autoLimit  = $opts["limit"];
+		}
 
-        // build needed variable(s)
-        $references     = $relation->getReferencedFields();
-        $modelRelation  = $relation->getReferencedModel();
+		// build needed variable(s)
+		$references     = $relation->getReferencedFields();
+		$modelRelation  = $relation->getReferencedModel();
 
-        $query = new Query($autoLimit);
-        $query->addCondition(
-            new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
-        );
+		$query = new Query($autoLimit);
+		$query->addCondition(
+			new SimpleCondition($references, Operator::OP_EQUALS, $model->getId())
+		);
 
-        $sort      = SimpleOrder::ORDER_ASC;
-        if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
-            $sort  = $opts["sort"];
-        }
+		$sort      = SimpleOrder::ORDER_ASC;
+		if (array_key_exists("sort", $opts) && is_string($opts["sort"])) {
+			$sort  = $opts["sort"];
+		}
 
-        $query->addOrder(
-            new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
-        );
+		$query->addOrder(
+			new SimpleOrder($modelRelation::getPrimaryKey(), $sort)
+		);
 
-        // fetch resultset
-        try {
-            $handler    = new Crud();
-            /** @type Resultset $resultSet */
-            $resultSet  = $handler->read(new $modelRelation, $query, false);
-            unset($handler);
-        } catch (CrudException $e) {
-            throw new Exception($e->getMessage());
-        }
+		// fetch resultset
+		try {
+			$handler    = new Crud();
+			/** @type Resultset $resultSet */
+			$resultSet  = $handler->read(new $modelRelation, $query, false);
+			unset($handler);
+		} catch (CrudException $e) {
+			throw new Exception($e->getMessage());
+		}
 
-        // check and prepare data.links
-        if (!isset($this->data["links"][$references])) {
-            $this->data["links"][$references] = array();
-        }
+		// check and prepare data.links
+		if (!isset($this->data["links"][$references])) {
+			$this->data["links"][$references] = array();
+		}
 
-        // check and prepare linked
-        if (!isset($this->linked[$references])) {
-            $this->linked[$references] = array();
-        }
+		// check and prepare linked
+		if (!isset($this->linked[$references])) {
+			$this->linked[$references] = array();
+		}
 
-        foreach ($resultSet as $ngModel) {
-            /** @type NgModel $ngModel */
-            // check if this model already populated
-            if (in_array($ngModel->getId(), $this->hasManyIds)) {
-                continue;
-            }
+		foreach ($resultSet as $ngModel) {
+			/** @type NgModel $ngModel */
+			// check if this model already populated
+			if (!isset($this->hasManyIds[$references])) {
+				$this->hasManyIds[$references] = array();
+			}
 
-            // check if this model already in our data.links
-            if (in_array($ngModel->getId(), $this->data["links"][$references])) {
-                continue;
-            }
+			if (in_array($ngModel->getId(), $this->hasManyIds)) {
+				continue;
+			}
 
-            // put relation id on data.links
-            $this->data["links"][$references][] = (int) $ngModel->getId();
+			$this->hasManyIds[$references][] = $ngModel->getId();
 
-            // envelope model into relation data
-            $relationData   = $this->envelope->envelope($ngModel);
+			// check if this model already in our data.links
+			if (in_array($ngModel->getId(), $this->data["links"][$references])) {
+				continue;
+			}
 
-            // check if relationData already in our linked
-            if (in_array($relationData, $this->linked[$references])) {
-                continue;
-            }
+			// put relation id on data.links
+			$this->data["links"][$references][] = (int) $ngModel->getId();
 
-            // put relation data on our linked
-            $this->linked[$references][] = $relationData;
-        }
-    }
+			// envelope model into relation data
+			$relationData   = $this->envelope->envelope($ngModel);
 
-    public function getRelations(
-        array &$data, NgModel $model, Envelope $envelope, array &$linked
-    ) {
+			// check if relationData already in our linked
+			if (in_array($relationData, $this->linked[$references])) {
+				continue;
+			}
 
-        if (!isset($data["links"])) {
-            $data["links"]  = array();
-        }
+			// put relation data on our linked
+			$this->linked[$references][] = $relationData;
+		}
+	}
 
-        $this->data         = $data;
-        $this->envelope     = $envelope;
-        $this->linked       = $linked;
-        $this->fetchRelationUsingModelsManager($model);
+	public function getRelations(
+		array &$data, NgModel $model, Envelope $envelope, array &$linked
+	) {
 
-        $data   = $this->data;
-        $linked = $this->linked;
-    }
+		if (!isset($data["links"])) {
+			$data["links"]  = array();
+		}
 
-    private function fetchRelationUsingModelsManager(NgModel $model)
-    {
-        /** @var ModelManager $modelsManager */
-        $modelsManager = $model->getModelsManager();
+		$this->data         = $data;
+		$this->envelope     = $envelope;
+		$this->linked       = $linked;
+		$this->fetchRelationUsingModelsManager($model);
 
-        foreach ($modelsManager->getBelongsTo($model) as $relation) {
-            $this->belongsTo($relation);
-        }
+		$data   = $this->data;
+		$linked = $this->linked;
+	}
 
-        foreach ($modelsManager->getHasMany($model) as $relation) {
-            $this->hasMany($model, $relation);
-        }
+	private function fetchRelationUsingModelsManager(NgModel $model)
+	{
+		/** @var ModelManager $modelsManager */
+		$modelsManager = $model->getModelsManager();
 
-        foreach ($modelsManager->getHasOne($model) as $relation) {
-            $this->hasOne($model, $relation);
-        }
-    }
+		foreach ($modelsManager->getBelongsTo($model) as $relation) {
+			$this->belongsTo($relation);
+		}
+
+		foreach ($modelsManager->getHasMany($model) as $relation) {
+			$this->hasMany($model, $relation);
+		}
+
+		foreach ($modelsManager->getHasOne($model) as $relation) {
+			$this->hasOne($model, $relation);
+		}
+	}
 }
