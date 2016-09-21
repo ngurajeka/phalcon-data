@@ -85,7 +85,7 @@ class Relation
 		}
 
 		// build data.links
-		$this->data["links"][$reference] = (int) $this->data[$field];
+		$this->data["links"][$field] = (int) $this->data[$field];
 
 		if (!isset($this->belongsToIds[$field])) {
 			$this->belongsToIds[$field]	= array();
@@ -132,12 +132,12 @@ class Relation
 		$relationData = $this->envelope->envelope($relationModel);
 
 		// check if linked[reference] already populated
-		if (!isset($this->linked[$reference])) {
-			$this->linked[$reference]       = array();
+		if (!isset($this->linked[$field])) {
+			$this->linked[$field]	= array();
 		}
 
 		// put relation data on linked
-		$this->linked[$reference][]         = $relationData;
+		$this->linked[$field][]		= $relationData;
 
 		// remove data[field]
 		unset($this->data[$field]);
