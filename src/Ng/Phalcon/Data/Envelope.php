@@ -47,6 +47,9 @@ class Envelope
             switch ($fields[$field]) {
                 case 0:
                     $data[$field] = (int) $model->$func();
+                    if (is_null($model->$func())) {
+                        $data[$field]   = null;
+                    }
                     break;
                 default:
                     $data[$field] = $model->$func();
