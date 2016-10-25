@@ -351,6 +351,10 @@ class Relation
 		$this->linked       = $linked;
 		$this->fetchRelationUsingModelsManager($model);
 
+		if (empty($this->data["links"])) {
+			$this->data["links"] = (object) array();
+		}
+
 		$data   = $this->data;
 		$linked = $this->linked;
 	}
